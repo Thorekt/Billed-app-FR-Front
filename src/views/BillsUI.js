@@ -47,7 +47,14 @@ export default ({ data: bills, loading, error }) => {
   } else if (error) {
     return ErrorPage(error)
   }
-  
+
+  try {
+    bills.sort((a,b) => new Date(b.date) - new Date(a.date));
+  } catch (error) {
+    console.error(error);
+  }
+
+
   return (`
     <div class='layout'>
       ${VerticalLayout(120)}
