@@ -97,10 +97,11 @@ export default class {
       $('.vertical-navbar').css({ height: '150vh' })
       this.counter ++
     } else {
-      
-      $(`#open-bill${bill.id}`).css({ background: '#2A2B35' })
+      $(`#open-bill${bill.id}`).css({ background: '#0D5AE5' })
 
-      $('.dashboard-right-container div').html(DashboardFormUI(bill))
+      $('.dashboard-right-container div').html(`
+        <div id="big-billed-icon" data-testid="big-billed-icon"> ${BigBilledIcon} </div>
+      `)
       $('.vertical-navbar').css({ height: '120vh' })
       this.counter ++
     }
@@ -145,6 +146,7 @@ export default class {
     }
 
     bills.forEach(bill => {
+      $(`#open-bill${bill.id}`).unbind('click');
       $(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills))
     })
 
