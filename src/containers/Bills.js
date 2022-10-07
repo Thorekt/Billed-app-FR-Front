@@ -61,9 +61,6 @@ export default class {
               };
             }
           });
-
-          //bills.sort((a, b) => b.date - a.date);
-          //bills.sort((a, b) => new Date(b.date) - new Date(a.date));
           return bills;
         });
     }
