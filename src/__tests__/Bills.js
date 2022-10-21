@@ -46,42 +46,90 @@ describe("Given I am connected as an employee", () => {
       expect(dates).toEqual(datesSorted);
     });
   });
+});
 
-  describe("When I am on Bills Page and i click the button 'new bill'", () => {
-    test("it should render ", () => {
-      const onNavigate = (pathname) => {
-        document.body.innerHTML = ROUTES({ pathname });
-      };
+describe("When I am on Bills Page and i click the button 'new bill'", () => {
+  test("it should open new bill", () => {
+    const onNavigate = (pathname) => {
+      document.body.innerHTML = ROUTES({ pathname });
+    };
 
-      Object.defineProperty(window, "localStorage", {
-        value: localStorageMock,
-      });
-      window.localStorage.setItem(
-        "user",
-        JSON.stringify({
-          type: "Employee",
-        })
-      );
-
-      const billsContainer = new Bills({
-        document,
-        onNavigate,
-        store: null,
-        bills: bills,
-        localStorage: window.localStorage,
-      });
-      document.body.innerHTML = BillsUI({ data: { bills } });
-
-      const handleClickNewBill = jest.fn((e) =>
-        billsContainer.handleClickNewBill(e, bills, 1)
-      );
-
-      let buttonNewBill = screen.getByTestId("btn-new-bill");
-      buttonNewBill.addEventListener("click", handleClickNewBill);
-
-      userEvent.click(buttonNewBill);
-      expect(handleClickNewBill).toHaveBeenCalled();
-      expect(screen.getByTestId("form-new-bill")).toBeTruthy();
+    Object.defineProperty(window, "localStorage", {
+      value: localStorageMock,
     });
+    window.localStorage.setItem(
+      "user",
+      JSON.stringify({
+        type: "Employee",
+      })
+    );
+
+    const billsContainer = new Bills({
+      document,
+      onNavigate,
+      store: null,
+      localStorage: window.localStorage,
+    });
+    document.body.innerHTML = BillsUI({ data: { bills } });
+
+    const handleClickNewBill = jest.fn((e) =>
+      billsContainer.handleClickNewBill(e, bills, 1)
+    );
+
+    let buttonNewBill = screen.getByTestId("btn-new-bill");
+    buttonNewBill.addEventListener("click", handleClickNewBill);
+
+    userEvent.click(buttonNewBill);
+    expect(handleClickNewBill).toHaveBeenCalled();
+    expect(screen.getByTestId("form-new-bill")).toBeTruthy();
+  });
+});
+
+describe("When I am on Bills Page and i click the eye icon", () => {
+  test("it should render the modal with the correct src", () => {
+    const onNavigate = (pathname) => {
+      document.body.innerHTML = ROUTES({ pathname });
+    };
+
+    Object.defineProperty(window, "localStorage", {
+      value: localStorageMock,
+    });
+    window.localStorage.setItem(
+      "user",
+      JSON.stringify({
+        type: "Employee",
+      })
+    );
+
+    const billsContainer = new Bills({
+      document,
+      onNavigate,
+      store: null,
+      localStorage: window.localStorage,
+    });
+
+    $.fn.modal = jest.fn(); // corrige un bug lie au modal
+    document.body.innerHTML = BillsUI({ data: bills });
+
+    let iconEye = screen.getAllByTestId("icon-eye");
+
+    
+
+    iconEye.forEach((icon) => {
+      const handleClickIconEye = jest.fn((e) =>
+        billsContainer.handleClickIconEye(icon)
+      );
+      
+      icon.addEventListener("click", handleClickIconEye);
+      userEvent.click(icon);
+      expect(handleClickIconEye).toHaveBeenCalled();
+      expect(screen.getAllByText("Justificatif")).toBeTruthy();
+      const imgInModal = document.body.querySelector(
+        ".modal-body .bill-proof-container img"
+      );
+      const imgSrc = imgInModal.getAttribute("src");  
+      expect(imgSrc).toEqual(icon.dataset.billUrl);
+    });
+
   });
 });
