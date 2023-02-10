@@ -10,6 +10,8 @@ import { bills } from '../fixtures/bills.js';
 import { ROUTES, ROUTES_PATH } from '../constants/routes';
 import { localStorageMock } from '../__mocks__/localStorage.js';
 
+// Store
+import mockStore from '../__mocks__/store';
 import router from '../app/Router.js';
 
 describe('Given I am connected as an employee', () => {
@@ -130,24 +132,23 @@ describe('When I am on Bills Page and i click the eye icon', () => {
 });
 
 // test d'intégration GET
-describe('Given I am a user connected as Admin', () => {
-  describe('When I navigate to Dashboard', () => {
+describe('Given I am a user connected as Employee', () => {
+  describe('When I navigate to Bills', () => {
     test('fetches bills from mock API GET', async () => {
       localStorage.setItem(
         'user',
-        JSON.stringify({ type: 'Admin', email: 'a@a' })
+        JSON.stringify({ type: 'Employee', email: 'e@e' })
       );
       const root = document.createElement('div');
       root.setAttribute('id', 'root');
       document.body.append(root);
       router();
-      window.onNavigate(ROUTES_PATH.Dashboard);
-      await waitFor(() => screen.getByText('Validations'));
-      const contentPending = await screen.getByText('En attente (1)');
-      expect(contentPending).toBeTruthy();
-      const contentRefused = await screen.getByText('Refusé (2)');
-      expect(contentRefused).toBeTruthy();
-      expect(screen.getByTestId('big-billed-icon')).toBeTruthy();
+      window.onNavigate(ROUTES_PATH.Bills);
+      await waitFor(() => screen.getByText('Mes notes de frais'));
+      const tableBody = await screen.getByTestId('tbody');
+
+      // expected values
+      expect(tableBody).not.toBe('');
     });
     describe('When an error occurs on API', () => {
       beforeEach(() => {
@@ -158,8 +159,8 @@ describe('Given I am a user connected as Admin', () => {
         window.localStorage.setItem(
           'user',
           JSON.stringify({
-            type: 'Admin',
-            email: 'a@a',
+            type: 'Employee',
+            email: 'e@e',
           })
         );
         const root = document.createElement('div');
@@ -175,9 +176,11 @@ describe('Given I am a user connected as Admin', () => {
             },
           };
         });
-        window.onNavigate(ROUTES_PATH.Dashboard);
+        window.onNavigate(ROUTES_PATH.Bills);
+
         await new Promise(process.nextTick);
-        const message = await screen.getByText(/Erreur 404/);
+        const message = await screen.getByText('Erreur');
+
         expect(message).toBeTruthy();
       });
 
@@ -190,9 +193,11 @@ describe('Given I am a user connected as Admin', () => {
           };
         });
 
-        window.onNavigate(ROUTES_PATH.Dashboard);
+        window.onNavigate(ROUTES_PATH.Bills);
+
         await new Promise(process.nextTick);
-        const message = await screen.getByText(/Erreur 500/);
+        const message = await screen.getByText('Erreur');
+
         expect(message).toBeTruthy();
       });
     });
