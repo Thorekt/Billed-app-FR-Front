@@ -34,59 +34,80 @@ describe('Given I am connected as an employee', () => {
       const formNewBill = screen.getByTestId('form-new-bill');
       expect(formNewBill).toBeTruthy();
     });
-    describe('when i upload a file, with a wrong extension name ', () => {
-      test('it should not show the file name', async () => {
-        await waitFor(() => screen.getByTestId('form-new-bill'));
-        const file = new File(['(file)'], 'file.wrongext', {
-          type: 'image/png',
-        });
-        let newBill = new NewBill({
-          document,
-          onNavigate,
-          store: null,
-          localStorage,
-        });
+  });
 
-        document.body.innerHTML = NewBillUI();
-        const handleChangeFile = jest.fn((e) => newBill.handleChangeFile(e));
-        const input = screen.getByTestId('file');
-        input.addEventListener('change', handleChangeFile);
-        fireEvent.change(input, {
-          target: {
-            files: [file],
-          },
-        });
-
-        expect(handleChangeFile).toHaveBeenCalled();
-        expect(input.files[0].name).toContain('file.wrongext');
-      });
+  describe('When I am on NewBill Page and i upload a file, with a good extension name ', () => {
+    window.localStorage.setItem(
+      'user',
+      JSON.stringify({
+        type: 'Employee',
+      })
+    );
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock,
     });
-    describe('when i upload a file, with a good extension name ', () => {
-      test('it should show the file name', async () => {
-        await waitFor(() => screen.getByTestId('form-new-bill'));
-        const file = new File(['(file)'], 'file.png', {
-          type: 'image/png',
-        });
-        let newBill = new NewBill({
-          document,
-          onNavigate,
-          store: null,
-          localStorage,
-        });
-
-        document.body.innerHTML = NewBillUI();
-        const handleChangeFile = jest.fn((e) => newBill.handleChangeFile(e));
-        const input = screen.getByTestId('file');
-        input.addEventListener('change', handleChangeFile);
-        fireEvent.change(input, {
-          target: {
-            files: [file],
-          },
-        });
-
-        expect(handleChangeFile).toHaveBeenCalled();
-        expect(input.files[0].name).toContain('file.png');
+    document.body.innerHTML = NewBillUI();
+    test('it should show the file name', async () => {
+      await waitFor(() => screen.getByTestId('form-new-bill'));
+      const file = new File(['(file)'], 'file.png', {
+        type: 'image/png',
       });
+      const mockStore = {
+        bills: jest.fn(() => newBill.store),
+        create: jest.fn(() => Promise.resolve({})),
+      };
+      let newBill = new NewBill({
+        document,
+        onNavigate,
+        store: mockStore,
+        localStorage: window.localStorage,
+      });
+
+      document.body.innerHTML = NewBillUI();
+      const input = screen.getByTestId('file');
+      const handleChangeFile = jest.fn((e) => newBill.handleChangeFile(e));
+      input.addEventListener('change', handleChangeFile);
+      user.upload(input, file);
+
+      expect(handleChangeFile).toHaveBeenCalled();
+      expect(input.files[0].name).toContain('file.png');
+    });
+  });
+  describe('When I am on NewBill Page and i upload a file, with a wrong extension name ', () => {
+    window.localStorage.setItem(
+      'user',
+      JSON.stringify({
+        type: 'Employee',
+      })
+    );
+    Object.defineProperty(window, 'localStorage', {
+      value: localStorageMock,
+    });
+    document.body.innerHTML = NewBillUI();
+    test('it should not show the file name', async () => {
+      await waitFor(() => screen.getByTestId('form-new-bill'));
+      const file = new File(['(file)'], 'file.txt', {
+        type: 'txt',
+      });
+      const mockStore = {
+        bills: jest.fn(() => newBill.store),
+        create: jest.fn(() => Promise.resolve({})),
+      };
+      let newBill = new NewBill({
+        document,
+        onNavigate,
+        store: mockStore,
+        localStorage: window.localStorage,
+      });
+
+      const input = screen.getByTestId('file');
+      console.log(input);
+      const handleChangeFile = jest.fn((e) => newBill.handleChangeFile(e));
+      input.addEventListener('change', handleChangeFile);
+      user.upload(input, file);
+
+      expect(handleChangeFile).toHaveBeenCalled();
+      expect(input.files[0].name).not.toContain('file.wrongext');
     });
   });
 });

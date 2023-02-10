@@ -24,12 +24,12 @@ export default class NewBill {
       .files[0];
     const filePath = e.target.value.split(/\\/g);
     const fileName = filePath[filePath.length - 1];
-    const regex = new RegExp(
+    const regexExtName = new RegExp(
       /([a-zA-Z0-9\s_\\.\-\(\):])+(.jpg|.jpeg|.png)$/,
       'i'
     );
-    if (!fileName.match(regex)) {
-      this.document.querySelector(`input[data-testid="file"]`).value = '';
+    if (!fileName.match(regexExtName)) {
+      e.target.value = '';
       return null;
     }
     const formData = new FormData();
