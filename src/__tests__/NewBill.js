@@ -9,6 +9,7 @@ import NewBillUI from '../views/NewBillUI.js';
 import NewBill from '../containers/NewBill.js';
 import { ROUTES, ROUTES_PATH } from '../constants/routes';
 
+import mockStore from '../__mocks__/store.js';
 import router from '../app/Router.js';
 
 describe('Given I am connected as an employee', () => {
@@ -101,13 +102,101 @@ describe('Given I am connected as an employee', () => {
       });
 
       const input = screen.getByTestId('file');
-      console.log(input);
       const handleChangeFile = jest.fn((e) => newBill.handleChangeFile(e));
       input.addEventListener('change', handleChangeFile);
       user.upload(input, file);
 
       expect(handleChangeFile).toHaveBeenCalled();
       expect(input.files[0].name).not.toContain('file.wrongext');
+    });
+  });
+});
+
+// test d'intégration GET
+describe('Given I am a user connected as Employee on the NewBill Page', () => {
+  describe('When I submit a new bill', () => {
+    beforeEach(() => {
+      window.localStorage.setItem(
+        'user',
+        JSON.stringify({
+          type: 'Employee',
+        })
+      );
+      Object.defineProperty(window, 'localStorage', {
+        value: localStorageMock,
+      });
+      document.body.innerHTML = NewBillUI();
+    });
+    test('send new bill to mock API POST', async () => {
+      const onNavigate = (pathname) => {
+        document.body.innerHTML = ROUTES({ pathname });
+      };
+
+      const newBill = new NewBill({
+        document,
+        onNavigate,
+        store: null,
+        localStorage: window.localStorage,
+      });
+
+      const handleSubmit = jest.fn(newBill.handleSubmit);
+      const form = screen.getByTestId('form-new-bill');
+      form.addEventListener('submit', handleSubmit);
+
+      fireEvent.submit(form);
+
+      expect(handleSubmit).toHaveBeenCalled();
+    });
+    describe('When an error occurs on API', () => {
+      beforeEach(() => {
+        jest.spyOn(mockStore, 'bills');
+        Object.defineProperty(window, 'localStorage', {
+          value: localStorageMock,
+        });
+        window.localStorage.setItem(
+          'user',
+          JSON.stringify({
+            type: 'Employee',
+            email: 'e@e',
+          })
+        );
+        const root = document.createElement('div');
+        root.setAttribute('id', 'root');
+        document.body.appendChild(root);
+        router();
+      });
+      test('send bills to an API and fails with 404 message error', async () => {
+        mockStore.bills.mockImplementationOnce(() => {
+          return {
+            list: () => {
+              return Promise.reject(new Error('Erreur 404'));
+            },
+          };
+        });
+        window.onNavigate(ROUTES_PATH.Bills);
+
+        await new Promise(process.nextTick);
+        const message = await screen.getByText('Erreur');
+
+        expect(message).toBeTruthy();
+      });
+
+      test('send bills to an API and fails with 500 message error', async () => {
+        mockStore.bills.mockImplementationOnce(() => {
+          return {
+            list: () => {
+              return Promise.reject(new Error('Erreur 500'));
+            },
+          };
+        });
+
+        window.onNavigate(ROUTES_PATH.Bills);
+
+        await new Promise(process.nextTick);
+        const message = await screen.getByText('Erreur');
+
+        expect(message).toBeTruthy();
+      });
     });
   });
 });
