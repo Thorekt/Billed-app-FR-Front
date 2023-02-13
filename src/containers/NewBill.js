@@ -24,18 +24,20 @@ export default class NewBill {
       .files[0];
     const filePath = e.target.value.split(/\\/g);
     const fileName = filePath[filePath.length - 1];
-    const regexExtName = new RegExp(
-      /([a-zA-Z0-9\s_\\.\-\(\):])+(.jpg|.jpeg|.png)$/,
-      'i'
-    );
-    if (!fileName.match(regexExtName)) {
-      e.target.value = '';
-      return false;
-    }
     const formData = new FormData();
     const email = JSON.parse(localStorage.getItem('user')).email;
     formData.append('file', file);
     formData.append('email', email);
+
+    const regexExtName = new RegExp(
+      /([a-zA-Z0-9\s_\\.\-\(\):])+(.jpg|.jpeg|.png)$/,
+      'i'
+    );
+
+    if (!fileName.match(regexExtName)) {
+      e.target.value = '';
+      return false;
+    }
 
     this.store
       .bills()

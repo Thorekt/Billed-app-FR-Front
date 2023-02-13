@@ -69,7 +69,6 @@ describe('Given I am connected as an employee', () => {
       const handleChangeFile = jest.fn((e) => newBill.handleChangeFile(e));
       input.addEventListener('change', handleChangeFile);
       user.upload(input, file);
-
       expect(handleChangeFile).toHaveBeenCalled();
       expect(input.files[0].name).toContain('file.png');
     });
