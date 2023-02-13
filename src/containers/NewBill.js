@@ -30,7 +30,7 @@ export default class NewBill {
     );
     if (!fileName.match(regexExtName)) {
       e.target.value = '';
-      return null;
+      return false;
     }
     const formData = new FormData();
     const email = JSON.parse(localStorage.getItem('user')).email;

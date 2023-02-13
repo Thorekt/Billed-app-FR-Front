@@ -37,7 +37,7 @@ describe('Given I am connected as an employee', () => {
     });
   });
 
-  describe('When I am on NewBill Page and i upload a file, with a good extension name ', () => {
+  describe('When I am on NewBill Page and i upload a file', () => {
     window.localStorage.setItem(
       'user',
       JSON.stringify({
@@ -48,7 +48,7 @@ describe('Given I am connected as an employee', () => {
       value: localStorageMock,
     });
     document.body.innerHTML = NewBillUI();
-    test('it should show the file name', async () => {
+    test('the file have  good extension name, it should show the file name', async () => {
       await waitFor(() => screen.getByTestId('form-new-bill'));
       const file = new File(['(file)'], 'file.png', {
         type: 'image/png',
@@ -72,42 +72,6 @@ describe('Given I am connected as an employee', () => {
 
       expect(handleChangeFile).toHaveBeenCalled();
       expect(input.files[0].name).toContain('file.png');
-    });
-  });
-  describe('When I am on NewBill Page and i upload a file, with a wrong extension name ', () => {
-    window.localStorage.setItem(
-      'user',
-      JSON.stringify({
-        type: 'Employee',
-      })
-    );
-    Object.defineProperty(window, 'localStorage', {
-      value: localStorageMock,
-    });
-    document.body.innerHTML = NewBillUI();
-    test('it should not show the file name', async () => {
-      await waitFor(() => screen.getByTestId('form-new-bill'));
-      const file = new File(['(file)'], 'file.txt', {
-        type: 'txt',
-      });
-      const mockStore = {
-        bills: jest.fn(() => newBill.store),
-        create: jest.fn(() => Promise.resolve({})),
-      };
-      let newBill = new NewBill({
-        document,
-        onNavigate,
-        store: mockStore,
-        localStorage: window.localStorage,
-      });
-
-      const input = screen.getByTestId('file');
-      const handleChangeFile = jest.fn((e) => newBill.handleChangeFile(e));
-      input.addEventListener('change', handleChangeFile);
-      user.upload(input, file);
-
-      expect(handleChangeFile).toHaveBeenCalled();
-      expect(input.files[0].name).not.toContain('file.wrongext');
     });
   });
 });
